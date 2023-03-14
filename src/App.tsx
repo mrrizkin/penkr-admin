@@ -1,6 +1,4 @@
-import { Component, For } from "solid-js";
-import Button from "./components/button";
-import Base from "./layouts/base";
+import type { Component } from "solid-js";
 import Collections from "./pages/collections";
 
 const App: Component = () => {
