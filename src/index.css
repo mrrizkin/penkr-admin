@@ -45,7 +45,7 @@ textarea.form-control {
 }
 
 .table {
-  @apply border-collapse;
+  @apply border-collapse min-w-full;
 }
 
 .table thead tr {
