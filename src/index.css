@@ -61,7 +61,7 @@ textarea.form-control {
 }
 
 .table td {
-  @apply whitespace-nowrap text-left px-4;
+  @apply whitespace-nowrap text-left px-4 max-w-sm overflow-hidden;
 }
 
 .table tbody td:nth-child(1) {

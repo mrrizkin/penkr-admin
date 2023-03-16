@@ -1,22 +1,60 @@
-import { Accessor, Component, createResource, For, Show } from "solid-js";
-
-async function getRecords(table_name: string) {
-  let res = await (
-    await fetch(`http://localhost:4000/api/collections/${table_name}/records`)
-  ).json();
-  return res.data;
-}
+import {
+  ColumnDef,
+  createSolidTable,
+  flexRender,
+  getCoreRowModel,
+} from "@tanstack/solid-table";
+import {
+  Accessor,
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  Resource,
+  Show,
+} from "solid-js";
 
 interface Props {
-  table_name: Accessor<string>;
+  records: Resource<any>;
+  columnDef: Accessor<ColumnDef<any>[]>;
 }
 
 const Table: Component<Props> = (props) => {
-  const [records] = createResource(props.table_name, getRecords);
+  const [rowSelection, setRowSelection] = createSignal({});
+
+  let table = createSolidTable({
+    get data() {
+      return props.records() || [];
+    },
+    state: {
+      rowSelection: rowSelection(),
+    },
+    enableRowSelection: true,
+    enableMultiRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    columns: props.columnDef(),
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  createEffect(() => {
+    table = createSolidTable({
+      get data() {
+        return props.records() || [];
+      },
+      state: {
+        rowSelection: rowSelection(),
+      },
+      enableRowSelection: true,
+      enableMultiRowSelection: true,
+      onRowSelectionChange: setRowSelection,
+      columns: props.columnDef(),
+      getCoreRowModel: getCoreRowModel(),
+    });
+  });
 
   return (
     <Show
-      when={!records.loading && records().length > 0}
+      when={!props.records.loading}
       fallback={
         <div class="flex items-center justify-center h-20">
           Loading<span class="dot-loader"></span>
@@ -26,30 +64,34 @@ const Table: Component<Props> = (props) => {
       <div class="table-container sc">
         <table class="table">
           <thead>
-            <tr>
-              <th>
-                <input type="checkbox" />
-              </th>
-              <For each={Object.keys(records()[0])}>
-                {(key) => <th>{key}</th>}
-              </For>
-            </tr>
+            <For each={table.getHeaderGroups()}>
+              {(headerGroup) => (
+                <tr>
+                  <For each={headerGroup.headers}>
+                    {(header) => (
+                      <th>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </th>
+                    )}
+                  </For>
+                </tr>
+              )}
+            </For>
           </thead>
           <tbody>
-            <For each={records()}>
+            <For each={table.getRowModel().rows}>
               {(row) => (
                 <tr>
-                  <td>
-                    <input type="checkbox" />
-                  </td>
-                  <For each={Object.values(row)}>
-                    {(value: any) => (
+                  <For each={row.getVisibleCells()}>
+                    {(cell) => (
                       <td>
-                        {typeof value == "boolean"
-                          ? value
-                            ? "True"
-                            : "False"
-                          : value}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </td>
                     )}
                   </For>
