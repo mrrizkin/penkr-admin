@@ -13,6 +13,7 @@ import {
   Resource,
   Show,
 } from "solid-js";
+import Blankstate from "./blankstate";
 
 interface Props {
   records: Resource<any>;
@@ -100,6 +101,13 @@ const Table: Component<Props> = (props) => {
             </For>
           </tbody>
         </table>
+        <Show when={props.records().length === 0}>
+          <Blankstate heading="No records found">
+            <p class="text-center">
+              You don't have any records in this collection.
+            </p>
+          </Blankstate>
+        </Show>
       </div>
     </Show>
   );

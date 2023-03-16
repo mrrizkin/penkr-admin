@@ -77,6 +77,14 @@ textarea.form-control {
   z-index: 1;
 }
 
+.blankstate {
+  @apply relative p-8 text-center;
+}
+
+.blankstate-heading {
+  @apply mb-2 text-lg font-bold;
+}
+
 .dot-loader {
   @apply inline-block overflow-hidden align-bottom;
 }
@@ -91,6 +99,19 @@ textarea.form-control {
   animation-duration: 2s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+}
+
+.anim-spin {
+  animation: spinning 1s linear infinite;
+}
+
+@keyframes spinning {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
 @keyframes pulse {

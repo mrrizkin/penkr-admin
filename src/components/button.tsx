@@ -1,18 +1,22 @@
-import type { Component, ParentProps } from "solid-js";
+import { Component, JSX, ParentProps, splitProps } from "solid-js";
 
-interface ButtonProps extends ParentProps {
+interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
   class?: string;
+  disabled?: boolean;
 }
 
-const Button: Component<ButtonProps> = (props) => {
+const Button: Component<ParentProps<ButtonProps>> = (props) => {
+  const [local, others] = splitProps(props, ["class", "disabled", "children"]);
   return (
     <button
       class="btn"
       classList={{
-        [props.class || ""]: true,
+        [local.class || ""]: true,
       }}
+      disabled={local.disabled}
+      {...others}
     >
-      {props.children}
+      {local.children}
     </button>
   );
 };

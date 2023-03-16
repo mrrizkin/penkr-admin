@@ -22,9 +22,17 @@ import {
   ViewsIcon,
 } from "../assets/icons";
 import { ColumnDef } from "@tanstack/solid-table";
+import Blankstate from "../components/blankstate";
 
-async function getCollections() {
+async function getCollections(arg: any) {
+  if (!arg.force) {
+    let res = localStorage.getItem("collections");
+    if (res) {
+      return JSON.parse(res);
+    }
+  }
   let res = await (await fetch("http://localhost:4000/api/collections")).json();
+  localStorage.setItem("collections", JSON.stringify(res.data));
   return res.data;
 }
 
@@ -68,6 +76,13 @@ function createColumnDef(columns: any) {
     columnDef.push({
       header: column.column_name,
       accessorKey: column.column_name,
+      cell: (info: any) => {
+        let cell = info.getValue() ?? <span class="text-zinc-500">N\\A</span>;
+        if (cell === true || cell === false) {
+          cell = <span>{JSON.stringify(cell)}</span>;
+        }
+        return cell;
+      },
     });
   }
   return columnDef;
@@ -107,15 +122,19 @@ const IndeterminateCheckbox: Component<IndeterminateCheckboxProps> = (
 };
 
 const Collections: Component = () => {
-  const [collections] = createResource(getCollections);
+  const [collections, { mutate }] = createResource(
+    { force: false }, // this fetch is heavy so we cache it, but we can force it to refetch
+    getCollections
+  );
   const [filteredCollections, setFilteredCollections] = createSignal(
     collections()
   );
   const [currentCollection, setCurrentCollection] = createSignal<any>(null);
-  const [records] = createResource(currentCollection, getRecords);
+  const [records, { refetch }] = createResource(currentCollection, getRecords);
   const [columnDef, setColumnDef] = createSignal<ColumnDef<any>[]>(
     createColumnDef([])
   );
+  const [clicked, setClicked] = createSignal(false);
 
   function filterCollections(e: any) {
     const value = e.target.value;
@@ -131,21 +150,30 @@ const Collections: Component = () => {
   }
 
   createEffect(() => {
-    if (!collections.loading) {
-      setFilteredCollections(collections());
-      setCurrentCollection(collections()[0]);
-      setColumnDef(createColumnDef(collections()[0].columns));
-    }
-  });
-
-  createEffect(() => {
     if (currentCollection() !== null) {
       setColumnDef(createColumnDef(currentCollection().columns));
     }
   });
 
+  createEffect(() => {
+    if (!collections.loading) {
+      setFilteredCollections(collections());
+    }
+  });
+
   function changeCollection(collection: any) {
     setCurrentCollection(collection);
+  }
+
+  async function refetchCollections() {
+    setClicked(true);
+    getCollections({
+      force: true,
+    }).then((res) => {
+      mutate(res);
+      refetch();
+      setClicked(false);
+    });
   }
 
   return (
@@ -169,6 +197,10 @@ const Collections: Component = () => {
               {(collection) => (
                 <div
                   class="flex items-center flex-start gap-x-1 py-1 px-2 rounded hover:(bg-zinc-800) cursor-pointer"
+                  classList={{
+                    "bg-zinc-800":
+                      currentCollection()?.table_name === collection.table_name,
+                  }}
                   onClick={() => changeCollection(collection)}
                 >
                   <Switch fallback={<TableIcon />}>
@@ -186,43 +218,66 @@ const Collections: Component = () => {
           )}
         </div>
         <div class="flex-1 overflow-auto p-4 sc flex flex-col">
-          <div class="flex gap-x-4 justify-between mb-4">
-            <div class="flex justify-start gap-x-2 items-center">
-              <div class="font-bold text-zinc-400">Collection</div>/
-              <Show
-                when={currentCollection() !== null}
-                fallback={
-                  <span>
-                    Loading<span class="dot-loader"></span>
+          <Show
+            when={currentCollection() !== null}
+            fallback={
+              <div class="flex-1 flex flex-col justify-center">
+                <Blankstate heading="no collection selected">
+                  <p>
+                    select a collection from the left sidebar to view its
+                    records
+                  </p>
+                </Blankstate>
+              </div>
+            }
+          >
+            <div class="flex gap-x-4 justify-between mb-4">
+              <div class="flex justify-start gap-x-2 items-center">
+                <div class="font-bold text-zinc-400">Collection</div>/
+                <Show
+                  when={currentCollection() !== null}
+                  fallback={
+                    <span>
+                      Loading<span class="dot-loader"></span>
+                    </span>
+                  }
+                >
+                  <span class="font-bold">
+                    {currentCollection().table_name}
                   </span>
-                }
-              >
-                <span class="font-bold">{currentCollection().table_name}</span>
-              </Show>
-              <Button>
-                <RefreshIcon />
-              </Button>
+                </Show>
+                <Button
+                  disabled={collections.loading || records.loading || clicked()}
+                  onClick={refetchCollections}
+                >
+                  <RefreshIcon
+                    classList={{
+                      "anim-spin": collections.loading || records.loading,
+                    }}
+                  />
+                </Button>
+              </div>
+              <div class="flex justitfy-end gap-x-2">
+                <Button>
+                  <Setting />
+                </Button>
+                <Button>API Overview</Button>
+                <Button class="btn-primary">New Record</Button>
+              </div>
             </div>
-            <div class="flex justitfy-end gap-x-2">
+            <div class="flex gap-x-2 mb-4">
               <Button>
-                <Setting />
+                <ViewSet />
               </Button>
-              <Button>API Overview</Button>
-              <Button class="btn-primary">New Record</Button>
+              <input
+                type="text"
+                class="form-control w-full"
+                placeholder="Filter"
+              />
+              <Button>Filter</Button>
             </div>
-          </div>
-          <div class="flex gap-x-2 mb-4">
-            <Button>
-              <ViewSet />
-            </Button>
-            <input
-              type="text"
-              class="form-control w-full"
-              placeholder="Filter"
-            />
-            <Button>Filter</Button>
-          </div>
-          <Table records={records} columnDef={columnDef} />
+            <Table records={records} columnDef={columnDef} />
+          </Show>
         </div>
       </div>
     </Base>
