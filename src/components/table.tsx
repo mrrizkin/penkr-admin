@@ -14,6 +14,7 @@ import {
   Show,
 } from "solid-js";
 import Blankstate from "./blankstate";
+import Spinner from "./spinner";
 
 interface Props {
   records: Resource<any>;
@@ -57,9 +58,9 @@ const Table: Component<Props> = (props) => {
     <Show
       when={!props.records.loading}
       fallback={
-        <div class="flex items-center justify-center h-20">
-          Loading<span class="dot-loader"></span>
-        </div>
+        <Blankstate icon={<Spinner />}>
+          <p class="text-center">Loading</p>
+        </Blankstate>
       }
     >
       <div class="table-container sc">

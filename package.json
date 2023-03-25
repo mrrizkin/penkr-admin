@@ -20,6 +20,8 @@
     "windicss": "^3.5.6"
   },
   "dependencies": {
+    "@kobalte/core": "^0.8.0",
+    "@solidjs/router": "^0.8.1",
     "@tanstack/solid-table": "^8.7.9",
     "solid-js": "^1.6.10"
   }

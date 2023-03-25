@@ -10,6 +10,7 @@ import TableIcon from "~icons/ph/folder-notch";
 import ViewsIcon from "~icons/mdi/table";
 import RefreshIcon from "~icons/tabler/refresh";
 import ViewSet from "~icons/ic/outline-remove-red-eye";
+import CheckIcon from "~icons/material-symbols/check-small-rounded";
 
 export {
   AppSetIcon,
@@ -21,6 +22,7 @@ export {
   Folder,
   Penkr,
   Setting,
+  CheckIcon,
   StorageSetIcon,
   TableIcon,
   RefreshIcon,

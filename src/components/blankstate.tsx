@@ -1,13 +1,15 @@
-import type { Component, ParentProps } from "solid-js";
+import type { Component, JSX, ParentProps } from "solid-js";
 
 interface Props extends ParentProps {
-  heading: string;
+  heading?: string;
+  icon?: JSX.Element;
 }
 
 const Blankstate: Component<Props> = (props) => {
   return (
     <div class="blankstate">
-      <h3 class="blankstate-heading">{props.heading}</h3>
+      {props.icon}
+      {props.heading && <h3 class="blankstate-heading">{props.heading}</h3>}
       {props.children}
     </div>
   );

@@ -14,36 +14,12 @@ import {
 import Button from "../components/button";
 import Table from "../components/table";
 import Base from "../layouts/base";
-import {
-  TableIcon,
-  RefreshIcon,
-  Setting,
-  ViewSet,
-  ViewsIcon,
-} from "../assets/icons";
+import { Icons } from "../assets";
 import { ColumnDef } from "@tanstack/solid-table";
-import Blankstate from "../components/blankstate";
-
-async function getCollections(arg: any) {
-  if (!arg.force) {
-    let res = localStorage.getItem("collections");
-    if (res) {
-      return JSON.parse(res);
-    }
-  }
-  let res = await (await fetch("http://localhost:4000/api/collections")).json();
-  localStorage.setItem("collections", JSON.stringify(res.data));
-  return res.data;
-}
-
-async function getRecords(collection: any) {
-  let res = await (
-    await fetch(
-      `http://localhost:4000/api/collections/${collection.table_name}/records`
-    )
-  ).json();
-  return res.data;
-}
+import NoCollectionSelected from "../components/organism/no-collection-selected";
+import NewRecord from "../components/forms/new-record";
+import { database } from "../api";
+import APIOverview from "../components/organism/api-overview";
 
 function createColumnDef(columns: any) {
   let columnDef: ColumnDef<any>[] = [];
@@ -112,7 +88,6 @@ const IndeterminateCheckbox: Component<IndeterminateCheckboxProps> = (
     <input
       type="checkbox"
       ref={ref}
-      class="cursor-pointer"
       classList={{
         [others.class || ""]: true,
       }}
@@ -124,13 +99,16 @@ const IndeterminateCheckbox: Component<IndeterminateCheckboxProps> = (
 const Collections: Component = () => {
   const [collections, { mutate }] = createResource(
     { force: false }, // this fetch is heavy so we cache it, but we can force it to refetch
-    getCollections
+    database.getCollections
   );
   const [filteredCollections, setFilteredCollections] = createSignal(
     collections()
   );
   const [currentCollection, setCurrentCollection] = createSignal<any>(null);
-  const [records, { refetch }] = createResource(currentCollection, getRecords);
+  const [records, { refetch }] = createResource(
+    currentCollection,
+    database.getRecords
+  );
   const [columnDef, setColumnDef] = createSignal<ColumnDef<any>[]>(
     createColumnDef([])
   );
@@ -167,13 +145,15 @@ const Collections: Component = () => {
 
   async function refetchCollections() {
     setClicked(true);
-    getCollections({
-      force: true,
-    }).then((res) => {
-      mutate(res);
-      refetch();
-      setClicked(false);
-    });
+    database
+      .getCollections({
+        force: true,
+      })
+      .then((res) => {
+        mutate(res);
+        refetch();
+        setClicked(false);
+      });
   }
 
   return (
@@ -203,12 +183,12 @@ const Collections: Component = () => {
                   }}
                   onClick={() => changeCollection(collection)}
                 >
-                  <Switch fallback={<TableIcon />}>
+                  <Switch fallback={<Icons.TableIcon />}>
                     <Match when={collection.table_type == "BASE TABLE"}>
-                      <TableIcon />
+                      <Icons.TableIcon />
                     </Match>
                     <Match when={collection.table_type == "View TABLE"}>
-                      <ViewsIcon />
+                      <Icons.ViewsIcon />
                     </Match>
                   </Switch>
                   <span>{collection.table_name}</span>
@@ -220,16 +200,7 @@ const Collections: Component = () => {
         <div class="flex-1 overflow-auto p-4 sc flex flex-col">
           <Show
             when={currentCollection() !== null}
-            fallback={
-              <div class="flex-1 flex flex-col justify-center">
-                <Blankstate heading="no collection selected">
-                  <p>
-                    select a collection from the left sidebar to view its
-                    records
-                  </p>
-                </Blankstate>
-              </div>
-            }
+            fallback={<NoCollectionSelected />}
           >
             <div class="flex gap-x-4 justify-between mb-4">
               <div class="flex justify-start gap-x-2 items-center">
@@ -250,25 +221,23 @@ const Collections: Component = () => {
                   disabled={collections.loading || records.loading || clicked()}
                   onClick={refetchCollections}
                 >
-                  <RefreshIcon
+                  <Icons.RefreshIcon
                     classList={{
-                      "anim-spin": collections.loading || records.loading,
+                      "anim-spin":
+                        collections.loading || records.loading || clicked(),
                     }}
                   />
                 </Button>
               </div>
               <div class="flex justitfy-end gap-x-2">
                 <Button>
-                  <Setting />
+                  <Icons.Setting />
                 </Button>
-                <Button>API Overview</Button>
-                <Button class="btn-primary">New Record</Button>
+                <APIOverview />
+                <NewRecord />
               </div>
             </div>
             <div class="flex gap-x-2 mb-4">
-              <Button>
-                <ViewSet />
-              </Button>
               <input
                 type="text"
                 class="form-control w-full"
