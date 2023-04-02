@@ -1,5 +1,4 @@
-import toast from "solid-toast";
-
+import toast from "../components/toast";
 
 export async function getCollections(arg: any) {
   try {
@@ -14,7 +13,7 @@ export async function getCollections(arg: any) {
       await fetch("http://" + host + ":4000/api/collections")
     ).json();
     localStorage.setItem("collections", JSON.stringify(res.data));
-    toast.success("Collections fetched successfully");
+    toast.success("Collection fetched successfully");
     return res.data;
   } catch (err: any) {
     toast.error(err.message);

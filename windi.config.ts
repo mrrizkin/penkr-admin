@@ -1,9 +1,9 @@
 import { defineConfig } from "windicss/helpers";
 import scrollSnap from "windicss/plugin/scroll-snap";
-import scrollbar from "@windicss/plugin-scrollbar";
+import forms from "windicss/plugin/forms";
 
 export default defineConfig({
-  plugins: [scrollSnap, scrollbar],
+  plugins: [scrollSnap, forms],
   variants: {
     scrollbar: ["rounded"],
   },

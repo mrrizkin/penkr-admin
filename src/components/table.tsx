@@ -14,6 +14,8 @@ import {
   Show,
 } from "solid-js";
 import Blankstate from "./blankstate";
+import LoadingRecord from "./organism/loading-records";
+import NoRecordFound from "./organism/no-record-found";
 import Spinner from "./spinner";
 
 interface Props {
@@ -55,23 +57,19 @@ const Table: Component<Props> = (props) => {
   });
 
   return (
-    <Show
-      when={!props.records.loading}
-      fallback={
-        <Blankstate icon={<Spinner />}>
-          <p class="text-center">Loading</p>
-        </Blankstate>
-      }
-    >
-      <div class="table-container sc">
-        <table class="table">
-          <thead>
+    <Show when={!props.records.loading} fallback={<LoadingRecord />}>
+      <div class="table-container">
+        <table class="min-w-full divide-y divide-gray-700">
+          <thead class="bg-zinc-800 sticky top-0 left-0">
             <For each={table.getHeaderGroups()}>
               {(headerGroup) => (
                 <tr>
                   <For each={headerGroup.headers}>
                     {(header) => (
-                      <th>
+                      <th
+                        scope="col"
+                        class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-zinc-400"
+                      >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
@@ -83,13 +81,13 @@ const Table: Component<Props> = (props) => {
               )}
             </For>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-zinc-700 bg-zinc-900">
             <For each={table.getRowModel().rows}>
               {(row) => (
                 <tr>
                   <For each={row.getVisibleCells()}>
                     {(cell) => (
-                      <td>
+                      <td class="p-4 text-sm font-medium whitespace-nowrap max-w-sm overflow-hidden overflow-ellipsis">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
@@ -103,11 +101,7 @@ const Table: Component<Props> = (props) => {
           </tbody>
         </table>
         <Show when={props.records().length === 0}>
-          <Blankstate heading="No records found">
-            <p class="text-center">
-              You don't have any records in this collection.
-            </p>
-          </Blankstate>
+          <NoRecordFound />
         </Show>
       </div>
     </Show>

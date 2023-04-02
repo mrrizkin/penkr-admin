@@ -11,14 +11,23 @@ import ViewsIcon from "~icons/mdi/table";
 import RefreshIcon from "~icons/tabler/refresh";
 import ViewSet from "~icons/ic/outline-remove-red-eye";
 import CheckIcon from "~icons/material-symbols/check-small-rounded";
+import CrossIcon from "~icons/iconoir/cancel";
+import ChevronIcon from "~icons/material-symbols/chevron-right-rounded";
+import HomeIcon from "~icons/ic/round-home";
+import FilterIcon from "~icons/material-symbols/filter-list-rounded";
+import EyeIcon from "~icons/ic/baseline-remove-red-eye";
 
 export {
+  FilterIcon,
+  HomeIcon,
+  EyeIcon,
   AppSetIcon,
   CodeBlock,
   Database,
   EmailSetIcon,
   ViewSet,
   ViewsIcon,
+  ChevronIcon,
   Folder,
   Penkr,
   Setting,
@@ -26,4 +35,5 @@ export {
   StorageSetIcon,
   TableIcon,
   RefreshIcon,
+  CrossIcon,
 };

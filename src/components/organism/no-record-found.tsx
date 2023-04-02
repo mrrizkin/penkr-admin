@@ -1,9 +1,9 @@
 import type { Component } from "solid-js";
 import Button from "../button";
 
-const NoCollectionSelected: Component = () => {
+const NoRecordFound: Component = () => {
   return (
-    <div class="flex flex-1 items-center text-center border rounded-lg h-96 border-gray-700">
+    <div class="flex items-center text-center h-96">
       <div class="flex flex-col w-full max-w-sm px-4 mx-auto">
         <div class="p-3 mx-auto text-pink-500 rounded-full bg-pink-900">
           <svg
@@ -21,18 +21,18 @@ const NoCollectionSelected: Component = () => {
             />
           </svg>
         </div>
-        <h1 class="mt-3 text-lg text-white">No Collection selected</h1>
+        <h1 class="mt-3 text-lg text-white">No Record Found</h1>
         <p class="mt-2 text-gray-400">
-          Your search “Stripe” did not match any vendors. Please try again or
-          create add a new vendor.
+          Seem like you don't have any record in this collection. Add a new
+          record or refetch.
         </p>
         <div class="flex items-center mt-4 sm:mx-auto gap-x-3">
           <Button>Refetch</Button>
-          <Button class="btn-primary">Select</Button>
+          <Button class="btn-primary">New Record</Button>
         </div>
       </div>
     </div>
   );
 };
 
-export default NoCollectionSelected;
+export default NoRecordFound;
